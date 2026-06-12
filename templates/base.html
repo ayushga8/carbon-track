@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CarbonTrack — Track your carbon footprint, set reduction goals, and join challenges to protect our planet.">
+    <meta name="theme-color" content="#059669">
+    <title>{% block title %}CarbonTrack — Carbon Footprint Awareness Platform{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body
+    data-firebase-api-key="{{ firebase_api_key }}"
+    data-firebase-auth-domain="{{ firebase_auth_domain }}"
+    data-firebase-project-id="{{ firebase_project_id }}"
+>
+    <a href="#main-content" class="skip-nav" aria-label="Skip to main content">Skip to content</a>
+
+    <!-- Navbar -->
+    <nav class="navbar" role="banner">
+        <div class="container">
+            <a href="{% url 'home' %}" class="nav-logo" aria-label="CarbonTrack home">
+                <span>🌿</span> CarbonTrack
+            </a>
+
+            <div class="nav-links" id="nav-links" role="navigation" aria-label="Primary navigation">
+                <a href="{% url 'home' %}" {% if request.resolver_match.url_name == 'home' %}class="active"{% endif %}>Home</a>
+                <a href="{% url 'calculator:calculator' %}" {% if request.resolver_match.app_name == 'calculator' %}class="active"{% endif %}>Calculator</a>
+                <a href="{% url 'dashboard:dashboard' %}" {% if request.resolver_match.app_name == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+                <a href="{% url 'challenges:challenge_list' %}" {% if request.resolver_match.app_name == 'challenges' and request.resolver_match.url_name != 'leaderboard' %}class="active"{% endif %}>Challenges</a>
+                <a href="{% url 'challenges:leaderboard' %}" {% if request.resolver_match.url_name == 'leaderboard' %}class="active"{% endif %}>Leaderboard</a>
+            </div>
+
+            <div class="nav-actions">
+                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">🌙</button>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline btn-sm">Profile</a>
+                    <a href="{% url 'accounts:logout' %}" class="btn btn-primary btn-sm">Logout</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline btn-sm">Login</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Register</a>
+                {% endif %}
+
+                <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-links">
+                    <span class="hamburger"></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container" aria-live="polite" aria-atomic="true">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main id="main-content" role="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="{% url 'home' %}" class="nav-logo" style="margin-bottom: var(--space-md); display: inline-flex;">
+                        <span>🌿</span> CarbonTrack
+                    </a>
+                    <p>Making sustainability measurable, achievable, and rewarding for everyone.</p>
+                </div>
+
+                <div>
+                    <h4>Quick Links</h4>
+                    <div class="footer-links">
+                        <a href="{% url 'about' %}">About</a>
+                        <a href="{% url 'contact' %}">Contact</a>
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4>Connect</h4>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Twitter" title="Twitter">🐦</a>
+                        <a href="#" aria-label="GitHub" title="GitHub">💻</a>
+                        <a href="#" aria-label="LinkedIn" title="LinkedIn">💼</a>
+                        <a href="#" aria-label="Instagram" title="Instagram">📷</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 CarbonTrack. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <button id="back-to-top" class="back-to-top" aria-label="Back to top">↑</button>
+
+    <!-- Scripts -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

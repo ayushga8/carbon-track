@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+{% load dashboard_tags %}
+
+{% block title %}{{ user.get_full_name|default:user.username }} — CarbonTrack{% endblock %}
+
+{% block content %}
+<section class="page-header" style="margin-top: 60px;">
+    <div class="container">
+        <h1>👤 Profile</h1>
+    </div>
+</section>
+
+<div class="container" style="max-width: 900px; padding-bottom: var(--space-3xl);">
+    <!-- Profile Header Card -->
+    <div class="card card-static" style="margin-bottom: var(--space-xl);">
+        <div class="profile-header">
+            {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="{{ user.username }}'s avatar" class="profile-avatar">
+            {% else %}
+                <div class="profile-avatar-placeholder">
+                    {{ user.first_name.0|default:user.username.0|upper }}
+                </div>
+            {% endif %}
+
+            <div>
+                <h2 style="margin-bottom: var(--space-xs);">{{ user.get_full_name|default:user.username }}</h2>
+                <p style="color: var(--color-text-muted); margin-bottom: var(--space-sm);">@{{ user.username }}</p>
+                <div class="flex gap-sm flex-wrap">
+                    <span class="badge badge-primary">{{ profile.get_auth_provider_display }}</span>
+                    {% if profile.is_email_verified %}
+                    <span class="badge badge-easy">✓ Verified</span>
+                    {% endif %}
+                </div>
+                {% if profile.bio %}
+                <p style="margin-top: var(--space-md);">{{ profile.bio }}</p>
+                {% endif %}
+                {% if profile.location %}
+                <p style="color: var(--color-text-muted); font-size: var(--text-sm);">📍 {{ profile.location }}</p>
+                {% endif %}
+                <p style="color: var(--color-text-light); font-size: var(--text-xs); margin-top: var(--space-sm);">
+                    Member since {{ user.date_joined|date:"F Y" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="profile-stats" style="margin-bottom: var(--space-xl);">
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-value">{{ total_carbon|default:"0"|floatformat:1 }}</div>
+            <div class="stat-label">kg CO₂ Tracked</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-value">{{ entry_count|default:"0" }}</div>
+            <div class="stat-label">Entries Made</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-value">{{ challenges_count|default:"0" }}</div>
+            <div class="stat-label">Challenges Joined</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🌱</div>
+            <div class="stat-value">{{ profile.total_carbon_saved|floatformat:1 }}</div>
+            <div class="stat-label">kg CO₂ Saved</div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-md" style="justify-content: center;">
+        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">✏️ Edit Profile</a>
+        <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline">📈 View Dashboard</a>
+    </div>
+</div>
+{% endblock %}

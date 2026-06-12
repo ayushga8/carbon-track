@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static %}
+{% load dashboard_tags %}
+
+{% block title %}Delete Entry — CarbonTrack{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>🗑️ Delete Entry</h1>
+    </div>
+</section>
+
+<div class="container" style="max-width: 600px; margin-bottom: var(--space-3xl);">
+    <div class="card card-static">
+        <div class="card-header">
+            <h3 style="color: var(--color-danger);">⚠️ Are you sure?</h3>
+            <p>This action cannot be undone. The following entry will be permanently deleted:</p>
+        </div>
+        <div class="card-body" style="background: var(--color-danger-light); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg);">
+            <div class="flex gap-md" style="align-items: center; margin-bottom: var(--space-sm);">
+                <span style="font-size: 1.5rem;">{{ object.category|category_icon }}</span>
+                <div>
+                    <strong>{{ object.get_category_display }} — {{ object.sub_category|title }}</strong>
+                    <p style="margin: 0; font-size: var(--text-sm); color: var(--color-text-muted);">
+                        {{ object.date|date:"F j, Y" }} · {{ object.value }} {{ object.unit }} · {{ object.carbon_kg|carbon_format }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <form method="post" aria-label="Confirm deletion">
+            {% csrf_token %}
+            <div class="flex gap-md" style="justify-content: flex-end;">
+                <a href="{% url 'calculator:entry_list' %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-danger">🗑️ Yes, Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

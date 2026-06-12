@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+{% load dashboard_tags %}
+
+{% block title %}Dashboard — CarbonTrack{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>📊 Your Dashboard</h1>
+        <p>Track your carbon footprint and get personalized insights to reduce your impact.</p>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Stats Cards -->
+    <div class="dashboard-grid">
+        <div class="stat-card animate-slide-up">
+            <div class="stat-icon">🌍</div>
+            <div class="stat-value dashboard-stat-value" data-value="{{ total_carbon }}" data-suffix=" kg" data-decimals="1">
+                {{ total_carbon }} kg
+            </div>
+            <div class="stat-label">Total Carbon (All Time)</div>
+        </div>
+        <div class="stat-card animate-slide-up">
+            <div class="stat-icon">📅</div>
+            <div class="stat-value dashboard-stat-value" data-value="{{ monthly_carbon }}" data-suffix=" kg" data-decimals="1">
+                {{ monthly_carbon }} kg
+            </div>
+            <div class="stat-label">This Month</div>
+        </div>
+        <div class="stat-card animate-slide-up">
+            <div class="stat-icon">📆</div>
+            <div class="stat-value dashboard-stat-value" data-value="{{ weekly_carbon }}" data-suffix=" kg" data-decimals="1">
+                {{ weekly_carbon }} kg
+            </div>
+            <div class="stat-label">This Week</div>
+        </div>
+        <div class="stat-card animate-slide-up">
+            <div class="stat-icon">📝</div>
+            <div class="stat-value dashboard-stat-value" data-value="{{ entry_count }}" data-decimals="0">
+                {{ entry_count }}
+            </div>
+            <div class="stat-label">Total Entries</div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-grid">
+        <div class="card card-static chart-container animate-slide-up">
+            <h3>📊 Category Breakdown</h3>
+            <p class="form-help">Your emissions by category (last 30 days)</p>
+            <div style="position: relative; height: 300px;">
+                <canvas id="categoryChart" aria-label="Carbon emissions by category doughnut chart" role="img"></canvas>
+            </div>
+        </div>
+        <div class="card card-static chart-container animate-slide-up">
+            <h3>📈 Emission Trend</h3>
+            <p class="form-help">Your daily emissions over the past 30 days</p>
+            <div style="position: relative; height: 300px;">
+                <canvas id="trendChart" aria-label="Daily carbon emission trend line chart" role="img"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison & Insights Row -->
+    <div class="charts-grid">
+        <div class="card card-static chart-container animate-slide-up">
+            <h3>🌐 How You Compare</h3>
+            <p class="form-help">Your yearly estimate vs global averages</p>
+            <div style="position: relative; height: 300px;">
+                <canvas id="comparisonChart" aria-label="Carbon footprint comparison bar chart" role="img"></canvas>
+            </div>
+        </div>
+        <div class="card card-static animate-slide-up">
+            <h3>💡 Personalized Tips</h3>
+            <p class="form-help">Suggestions based on your highest emission areas</p>
+            {% if insights %}
+                {% for insight in insights %}
+                <div class="insight-card" style="margin-bottom: var(--space-md);">
+                    <div class="insight-category">
+                        {{ insight.category|category_icon }} {{ insight.category_display }} — {{ insight.total }} kg CO₂
+                    </div>
+                    <ul>
+                        {% for tip in insight.tips %}
+                        <li>{{ tip }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center mt-3">
+                    <p style="font-size: 3rem;">🌱</p>
+                    <p>Start logging your emissions to get personalized tips!</p>
+                    <a href="{% url 'calculator:calculator' %}" class="btn btn-primary btn-sm mt-2">Log Your First Entry</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions" style="justify-content: center; margin-bottom: var(--space-3xl);">
+        <a href="{% url 'calculator:calculator' %}" class="btn btn-primary">➕ Log New Entry</a>
+        <a href="{% url 'calculator:entry_list' %}" class="btn btn-secondary">📋 View History</a>
+        <a href="{% url 'challenges:challenge_list' %}" class="btn btn-outline">🎯 Join Challenge</a>
+    </div>
+</div>
+
+<!-- Chart Data (hidden JSON for JavaScript) -->
+<script id="category-data" type="application/json">{{ category_data_json|safe }}</script>
+<script id="trend-data" type="application/json">{{ trend_data_json|safe }}</script>
+<script id="comparison-data" type="application/json">{{ comparison_data_json|safe }}</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

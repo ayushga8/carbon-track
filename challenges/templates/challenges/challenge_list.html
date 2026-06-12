@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Eco Challenges — CarbonTrack{% endblock %}
+
+{% block content %}
+<section class="page-header" style="margin-top: 60px;">
+    <div class="container">
+        <h1>🎯 Eco Challenges</h1>
+        <p>Join fun challenges to reduce your carbon footprint and compete with the community.</p>
+    </div>
+</section>
+
+<div class="container" style="padding-bottom: var(--space-3xl);">
+
+    <!-- Filter -->
+    <form method="get" class="filter-bar" aria-label="Filter challenges">
+        <select name="category" class="form-input" aria-label="Filter by category">
+            <option value="">All Categories</option>
+            <option value="transport" {% if request.GET.category == 'transport' %}selected{% endif %}>🚗 Transportation</option>
+            <option value="energy" {% if request.GET.category == 'energy' %}selected{% endif %}>⚡ Energy</option>
+            <option value="food" {% if request.GET.category == 'food' %}selected{% endif %}>🍽️ Food</option>
+            <option value="shopping" {% if request.GET.category == 'shopping' %}selected{% endif %}>🛍️ Shopping</option>
+            <option value="waste" {% if request.GET.category == 'waste' %}selected{% endif %}>🗑️ Waste</option>
+            <option value="general" {% if request.GET.category == 'general' %}selected{% endif %}>🌍 General</option>
+        </select>
+        <select name="difficulty" class="form-input" aria-label="Filter by difficulty">
+            <option value="">All Difficulties</option>
+            <option value="easy" {% if request.GET.difficulty == 'easy' %}selected{% endif %}>Easy</option>
+            <option value="medium" {% if request.GET.difficulty == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="hard" {% if request.GET.difficulty == 'hard' %}selected{% endif %}>Hard</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">🔍 Filter</button>
+    </form>
+
+    <!-- Challenge Grid -->
+    {% if object_list %}
+    <div class="challenge-grid">
+        {% for challenge in object_list %}
+        <div class="card challenge-card animate-slide-up">
+            <div class="challenge-icon">{{ challenge.icon }}</div>
+            <h3>{{ challenge.title }}</h3>
+            <div class="challenge-meta">
+                <span class="badge badge-{{ challenge.category }}">{{ challenge.get_category_display }}</span>
+                <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+            </div>
+            <p style="margin: var(--space-md) 0;">{{ challenge.description|truncatewords:25 }}</p>
+            <div class="flex-between" style="font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-md);">
+                <span>🌱 {{ challenge.carbon_save_potential }} kg CO₂</span>
+                <span>📅 {{ challenge.duration_days }} days</span>
+            </div>
+            <div class="flex-between">
+                <span style="font-size: var(--text-xs); color: var(--color-text-light);">{{ challenge.participants_count }} participants</span>
+                <a href="{% url 'challenges:challenge_detail' challenge.pk %}" class="btn btn-primary btn-sm">View →</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card card-static" style="text-align: center; padding: var(--space-3xl);">
+        <p style="font-size: 3rem;">🎯</p>
+        <h3>No challenges found</h3>
+        <p>Try adjusting your filters.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

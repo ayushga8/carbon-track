@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}CarbonTrack — Track Your Carbon Footprint{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero" aria-labelledby="hero-heading">
+    <div class="hero-shape"></div>
+    <div class="hero-shape"></div>
+    <div class="hero-shape"></div>
+    <div class="hero-content">
+        <h1 id="hero-heading">
+            Track Your<br>
+            <span class="gradient-text">Carbon Footprint</span>
+        </h1>
+        <p>
+            Understand, track, and reduce your environmental impact through
+            simple actions and personalized insights.
+        </p>
+        <div class="hero-actions">
+            <a href="{% url 'accounts:register' %}" class="btn btn-primary" aria-label="Get started — create your free account">
+                Get Started →
+            </a>
+            <a href="{% url 'about' %}" class="btn btn-secondary" aria-label="Learn more about CarbonTrack">
+                Learn More
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Counter Section -->
+<section class="stats-section" aria-label="Platform statistics">
+    <div class="container">
+        <div class="stats-grid">
+            <div aria-label="2.5 million kilograms of CO2 tracked">
+                <span class="stat-counter" data-target="2500000" data-suffix="+">0</span>
+                <span class="stat-text">kg CO₂ Tracked</span>
+            </div>
+            <div aria-label="50 thousand active users">
+                <span class="stat-counter" data-target="50000" data-suffix="+">0</span>
+                <span class="stat-text">Active Users</span>
+            </div>
+            <div aria-label="10 thousand challenges completed">
+                <span class="stat-counter" data-target="10000" data-suffix="+">0</span>
+                <span class="stat-text">Challenges Completed</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" aria-labelledby="features-heading">
+    <div class="container">
+        <h2 id="features-heading" class="section-title">
+            Everything you need to go green
+        </h2>
+        <p class="section-subtitle">
+            Powerful tools designed to help you understand and minimize your environmental impact.
+        </p>
+
+        <div class="features-grid">
+            <article class="card feature-card animate-slide-up" aria-labelledby="feature-track">
+                <div class="feature-icon" aria-hidden="true">📊</div>
+                <h3 id="feature-track">Track Emissions</h3>
+                <p>Monitor your daily carbon output across categories like transport, energy, food, and shopping.</p>
+            </article>
+
+            <article class="card feature-card animate-slide-up" aria-labelledby="feature-goals">
+                <div class="feature-icon" aria-hidden="true">🎯</div>
+                <h3 id="feature-goals">Set Goals</h3>
+                <p>Create personalized reduction targets and receive smart nudges to stay on track.</p>
+            </article>
+
+            <article class="card feature-card animate-slide-up" aria-labelledby="feature-challenges">
+                <div class="feature-icon" aria-hidden="true">🌱</div>
+                <h3 id="feature-challenges">Eco Challenges</h3>
+                <p>Join gamified challenges to reduce your impact and earn badges along the way.</p>
+            </article>
+
+            <article class="card feature-card animate-slide-up" aria-labelledby="feature-insights">
+                <div class="feature-icon" aria-hidden="true">📈</div>
+                <h3 id="feature-insights">Visual Insights</h3>
+                <p>Beautiful, interactive charts showing your progress over time with actionable breakdowns.</p>
+            </article>
+
+            <article class="card feature-card animate-slide-up" aria-labelledby="feature-leaderboard">
+                <div class="feature-icon" aria-hidden="true">🏆</div>
+                <h3 id="feature-leaderboard">Leaderboard</h3>
+                <p>Compete with community members and celebrate top reducers on the global leaderboard.</p>
+            </article>
+
+            <article class="card feature-card animate-slide-up" aria-labelledby="feature-tips">
+                <div class="feature-icon" aria-hidden="true">💡</div>
+                <h3 id="feature-tips">Smart Tips</h3>
+                <p>Get AI-powered, personalized suggestions to reduce your carbon footprint effortlessly.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="steps-section" aria-labelledby="how-heading">
+    <div class="container">
+        <h2 id="how-heading" class="section-title">How it works</h2>
+        <p class="section-subtitle">Three simple steps to a greener lifestyle.</p>
+
+        <div class="steps-grid">
+            <article class="step-card card" aria-labelledby="step-1">
+                <div class="step-number" aria-hidden="true">1</div>
+                <h3 id="step-1">Calculate</h3>
+                <p>Use our smart calculator to estimate your daily, weekly, or monthly carbon emissions.</p>
+            </article>
+
+            <article class="step-card card" aria-labelledby="step-2">
+                <div class="step-number" aria-hidden="true">2</div>
+                <h3 id="step-2">Track</h3>
+                <p>Log your activities and watch your personal dashboard reveal patterns and trends.</p>
+            </article>
+
+            <article class="step-card card" aria-labelledby="step-3">
+                <div class="step-number" aria-hidden="true">3</div>
+                <h3 id="step-3">Reduce</h3>
+                <p>Follow personalized tips and join challenges to meaningfully shrink your footprint.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="cta-section" aria-labelledby="cta-heading">
+    <div class="container">
+        <h2 id="cta-heading">Ready to make a difference?</h2>
+        <p>
+            Join thousands of users who are already reducing their carbon footprint.
+            It's free, simple, and impactful.
+        </p>
+        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg" aria-label="Register for a free CarbonTrack account">
+            Create Your Free Account →
+        </a>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* Animated stat counters using IntersectionObserver */
+    document.addEventListener('DOMContentLoaded', function () {
+        var counters = document.querySelectorAll('.stat-counter');
+
+        function formatShort(n) {
+            if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n / 1000).toFixed(0) + 'K';
+            return n.toString();
+        }
+
+        function animateCounter(el) {
+            var target = parseInt(el.dataset.target, 10);
+            var suffix = el.dataset.suffix || '';
+            var duration = 2000;
+            var steps = 60;
+            var increment = target / steps;
+            var current = 0;
+            var step = 0;
+
+            var timer = setInterval(function () {
+                step++;
+                current += increment;
+                if (step >= steps) { current = target; clearInterval(timer); }
+                el.textContent = formatShort(Math.floor(current)) + suffix;
+            }, duration / steps);
+        }
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    counters.forEach(animateCounter);
+                    observer.disconnect();
+                }
+            });
+        }, { threshold: 0.3 });
+
+        var statsSection = document.querySelector('.stats-section');
+        if (statsSection) observer.observe(statsSection);
+    });
+</script>
+{% endblock %}

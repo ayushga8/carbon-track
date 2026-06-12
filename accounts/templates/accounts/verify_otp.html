@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Verify Your Email — CarbonTrack{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="card auth-card otp-container">
+        <h1>✉️ Verify Your Email</h1>
+        <p class="auth-subtitle">
+            We've sent a 6-digit code to <strong>{{ email|default:"your email" }}</strong>
+        </p>
+
+        {% if messages %}
+        <div style="margin-bottom: var(--space-md);">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags }}" role="alert" style="position: static; max-width: 100%;">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" novalidate aria-label="OTP verification form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                {{ form.otp_code }}
+                {% if form.otp_code.errors %}
+                <div class="form-error" role="alert">{% for e in form.otp_code.errors %}{{ e }}{% endfor %}</div>
+                {% endif %}
+            </div>
+
+            <div class="countdown" id="otp-countdown" aria-live="polite">
+                Time remaining: <span id="countdown-timer">5:00</span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block mt-3">Verify Code →</button>
+        </form>
+
+        <div style="text-align: center; margin-top: var(--space-xl);">
+            <p style="color: var(--color-text-muted); font-size: var(--text-sm); margin-bottom: var(--space-sm);">
+                Didn't receive the code?
+            </p>
+            <form method="post" action="{% url 'accounts:resend_otp' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline btn-sm" id="resend-btn">
+                    Resend OTP
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    /* OTP Countdown Timer */
+    (function() {
+        var totalSeconds = 5 * 60;
+        var timerEl = document.getElementById('countdown-timer');
+        var resendBtn = document.getElementById('resend-btn');
+
+        if (!timerEl) return;
+
+        var interval = setInterval(function() {
+            totalSeconds--;
+            var minutes = Math.floor(totalSeconds / 60);
+            var seconds = totalSeconds % 60;
+            timerEl.textContent = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+
+            if (totalSeconds <= 0) {
+                clearInterval(interval);
+                timerEl.textContent = 'Expired';
+                timerEl.style.color = 'var(--color-danger)';
+                if (resendBtn) resendBtn.disabled = false;
+            }
+        }, 1000);
+
+        if (resendBtn) resendBtn.disabled = true;
+        setTimeout(function() {
+            if (resendBtn) resendBtn.disabled = false;
+        }, 60000);
+    })();
+</script>
+{% endblock %}

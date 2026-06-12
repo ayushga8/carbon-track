@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About — CarbonTrack{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<section class="page-header" style="background: linear-gradient(135deg, #064E3B, #0F766E); color: #fff; padding: var(--space-4xl) 0 var(--space-2xl); margin-top: 60px;">
+    <div class="container" style="text-align: center;">
+        <h1 style="color: #fff;">About CarbonTrack</h1>
+        <p style="color: rgba(255,255,255,0.85); max-width: 600px; margin: 0 auto;">
+            Empowering individuals and communities to understand, track, and reduce their environmental impact.
+        </p>
+    </div>
+</section>
+
+<div class="container" style="padding: var(--space-3xl) 0;">
+
+    <!-- Mission Statement -->
+    <div class="card card-static" style="max-width: 800px; margin: 0 auto var(--space-3xl); padding: var(--space-2xl);">
+        <h2 class="section-title">🌍 Our Mission</h2>
+        <p style="font-size: var(--text-lg); line-height: 1.8; text-align: center; max-width: 700px; margin: 0 auto;">
+            Climate change is the defining challenge of our generation. At CarbonTrack, we believe that
+            awareness is the first step toward action. Our platform provides the tools, data, and community
+            support needed to make sustainable living accessible, measurable, and rewarding for everyone.
+        </p>
+    </div>
+
+    <!-- Values Section -->
+    <h2 class="section-title">Our Values</h2>
+    <p class="section-subtitle">The principles that guide everything we build.</p>
+
+    <div class="features-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: var(--space-3xl);">
+        <div class="card feature-card animate-slide-up">
+            <div class="feature-icon" aria-hidden="true">🔍</div>
+            <h3>Transparency</h3>
+            <p>We use open, verified emission factors from EPA and DEFRA. Our methodology is clear, our data is trustworthy.</p>
+        </div>
+        <div class="card feature-card animate-slide-up">
+            <div class="feature-icon" aria-hidden="true">🤝</div>
+            <h3>Community</h3>
+            <p>Change happens together. Our challenges and leaderboards foster a supportive community of eco-conscious individuals.</p>
+        </div>
+        <div class="card feature-card animate-slide-up">
+            <div class="feature-icon" aria-hidden="true">🌱</div>
+            <h3>Impact</h3>
+            <p>Every small action counts. We help you see the real impact of your choices and celebrate every step toward sustainability.</p>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="card card-static" style="text-align: center; padding: var(--space-2xl);">
+        <h2 class="section-title">👥 Our Team</h2>
+        <p class="section-subtitle">
+            We're a passionate group of developers, designers, and environmental scientists working to make sustainability accessible.
+        </p>
+        <div style="display: flex; justify-content: center; gap: var(--space-xl); flex-wrap: wrap; margin-top: var(--space-xl);">
+            <div style="text-align: center;">
+                <div class="profile-avatar-placeholder" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto var(--space-sm);">🧑‍💻</div>
+                <strong>Tech Lead</strong>
+                <p style="font-size: var(--text-sm);">Full-Stack Development</p>
+            </div>
+            <div style="text-align: center;">
+                <div class="profile-avatar-placeholder" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto var(--space-sm);">🎨</div>
+                <strong>Designer</strong>
+                <p style="font-size: var(--text-sm);">UX/UI Design</p>
+            </div>
+            <div style="text-align: center;">
+                <div class="profile-avatar-placeholder" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto var(--space-sm);">🌍</div>
+                <strong>Scientist</strong>
+                <p style="font-size: var(--text-sm);">Environmental Data</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Calculate Your Carbon Footprint — CarbonTrack{% endblock %}
+
+{% block content %}
+<section class="page-header" style="margin-top: 60px;">
+    <div class="container">
+        <h1>🌿 Calculate Your Carbon Footprint</h1>
+        <p>Log your daily activities and track your environmental impact.</p>
+    </div>
+</section>
+
+<div class="container" style="padding-bottom: var(--space-3xl);">
+    <div class="calculator-form">
+        <div class="card card-static" style="max-width: 700px; margin: 0 auto;">
+            <h2 style="margin-bottom: var(--space-lg);">Log an Emission</h2>
+
+            <form method="post" id="calculator-form"
+                  data-subcategories-url="{% url 'calculator:subcategories_api' 'CATEGORY_PLACEHOLDER' %}"
+                  aria-label="Carbon emission calculator form">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div class="message message-error" role="alert" style="position: static; max-width: 100%; margin-bottom: var(--space-md);">
+                    Please correct the errors below.
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="calc-category">📂 Category</label>
+                    {{ form.category }}
+                </div>
+
+                <div class="form-group">
+                    <label for="calc-subcategory">📋 Sub-category</label>
+                    {{ form.sub_category }}
+                    <p class="form-help">Select a category first</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="calc-value">📊 Quantity</label>
+                    <div style="display: flex; gap: var(--space-sm); align-items: center;">
+                        {{ form.value }}
+                        <span class="badge badge-primary unit-label" style="padding: 12px 16px; font-size: var(--text-sm);">unit</span>
+                    </div>
+                </div>
+
+                <!-- CO2 Preview -->
+                <div class="co2-preview" aria-live="polite">
+                    <span>🌍 Estimated:</span>
+                    <span class="co2-value">0.00</span>
+                    <span class="co2-label">kg CO₂</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="calc-date">📅 Date</label>
+                    {{ form.date }}
+                </div>
+
+                <div class="form-group">
+                    <label for="calc-notes">📝 Notes</label>
+                    {{ form.notes }}
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">🌱 Log Emission</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Info -->
+    <div style="margin-top: var(--space-2xl);">
+        <h2 class="section-title">Emission Categories</h2>
+        <p class="section-subtitle">Click a category to quick-select it</p>
+        <div class="category-info-grid">
+            <div class="category-info-card" data-category="transport">
+                <div class="cat-icon">🚗</div>
+                <div class="cat-name">Transportation</div>
+            </div>
+            <div class="category-info-card" data-category="energy">
+                <div class="cat-icon">⚡</div>
+                <div class="cat-name">Home Energy</div>
+            </div>
+            <div class="category-info-card" data-category="food">
+                <div class="cat-icon">🍽️</div>
+                <div class="cat-name">Food & Diet</div>
+            </div>
+            <div class="category-info-card" data-category="shopping">
+                <div class="cat-icon">🛍️</div>
+                <div class="cat-name">Shopping</div>
+            </div>
+            <div class="category-info-card" data-category="waste">
+                <div class="cat-icon">🗑️</div>
+                <div class="cat-name">Waste</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/calculator.js' %}"></script>
+{% endblock %}

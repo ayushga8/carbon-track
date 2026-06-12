@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ challenge.title }} — CarbonTrack{% endblock %}
+
+{% block content %}
+<section class="page-header" style="margin-top: 60px;">
+    <div class="container">
+        <h1>{{ challenge.icon }} {{ challenge.title }}</h1>
+    </div>
+</section>
+
+<div class="container" style="max-width: 800px; padding-bottom: var(--space-3xl);">
+    <div class="card card-static" style="margin-bottom: var(--space-xl);">
+        <div class="flex gap-sm flex-wrap" style="margin-bottom: var(--space-md);">
+            <span class="badge badge-{{ challenge.category }}">{{ challenge.get_category_display }}</span>
+            <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+        </div>
+
+        <p style="font-size: var(--text-lg); line-height: 1.8; margin-bottom: var(--space-xl);">{{ challenge.description }}</p>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin-bottom: var(--space-xl);">
+            <div class="stat-card">
+                <div class="stat-icon">🌱</div>
+                <div class="stat-value">{{ challenge.carbon_save_potential }}</div>
+                <div class="stat-label">kg CO₂ Saved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-value">{{ challenge.duration_days }}</div>
+                <div class="stat-label">Days</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value">{{ challenge.participants_count }}</div>
+                <div class="stat-label">Participants</div>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+            {% if user_challenge %}
+                <div class="card" style="background: var(--color-success-light); border-color: var(--color-success); margin-bottom: var(--space-md);">
+                    <p style="margin: 0; color: #166534;"><strong>✅ You've joined this challenge!</strong> Status: {{ user_challenge.get_status_display }}</p>
+                    <div class="progress-bar" style="margin-top: var(--space-sm);">
+                        <div class="progress-fill" style="width: {{ user_challenge.progress }}%;"></div>
+                    </div>
+                    <p style="font-size: var(--text-sm); margin-top: var(--space-xs); color: #166534;">Progress: {{ user_challenge.progress }}%</p>
+                </div>
+            {% else %}
+                <form method="post" action="{% url 'challenges:join_challenge' challenge.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">🎯 Join This Challenge</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-block">Login to Join</a>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'challenges:challenge_list' %}" class="btn btn-outline">← Back to Challenges</a>
+</div>
+{% endblock %}

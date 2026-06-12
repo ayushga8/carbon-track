@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+{% load dashboard_tags %}
+
+{% block title %}Entry Detail — CarbonTrack{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>📋 Entry Detail</h1>
+    </div>
+</section>
+
+<div class="container" style="max-width: 700px; margin-bottom: var(--space-3xl);">
+    <div class="card card-static">
+        <div class="card-header flex-between">
+            <div>
+                <span style="font-size: 2rem;">{{ entry.category|category_icon }}</span>
+                <h2 style="display: inline; margin-left: 8px;">{{ entry.get_category_display }}</h2>
+            </div>
+            <span class="badge badge-{{ entry.category }}">{{ entry.get_category_display }}</span>
+        </div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); margin-bottom: var(--space-lg);">
+                <div>
+                    <p class="form-help" style="margin-bottom: 4px;">Sub-category</p>
+                    <p style="font-weight: 600; color: var(--color-text);">{{ entry.sub_category|title }}</p>
+                </div>
+                <div>
+                    <p class="form-help" style="margin-bottom: 4px;">Date</p>
+                    <p style="font-weight: 600; color: var(--color-text);">{{ entry.date|date:"F j, Y" }}</p>
+                </div>
+                <div>
+                    <p class="form-help" style="margin-bottom: 4px;">Amount</p>
+                    <p style="font-weight: 600; color: var(--color-text);">{{ entry.value }} {{ entry.unit }}</p>
+                </div>
+                <div>
+                    <p class="form-help" style="margin-bottom: 4px;">Carbon Emission</p>
+                    <p style="font-weight: 800; color: var(--color-primary); font-size: var(--text-xl);">
+                        {{ entry.carbon_kg|carbon_format }}
+                    </p>
+                </div>
+            </div>
+            {% if entry.notes %}
+            <div>
+                <p class="form-help" style="margin-bottom: 4px;">Notes</p>
+                <p style="color: var(--color-text);">{{ entry.notes }}</p>
+            </div>
+            {% endif %}
+            <p class="form-help mt-3">Logged on {{ entry.created_at|date:"F j, Y \a\t g:i A" }}</p>
+        </div>
+        <div class="card-footer flex-between">
+            <a href="{% url 'calculator:entry_list' %}" class="btn btn-outline btn-sm">← Back to History</a>
+            <a href="{% url 'calculator:entry_delete' entry.pk %}" class="btn btn-danger btn-sm">🗑️ Delete</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

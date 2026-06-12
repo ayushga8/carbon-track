@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile — CarbonTrack{% endblock %}
+
+{% block content %}
+<section class="page-header" style="margin-top: 60px;">
+    <div class="container">
+        <h1>✏️ Edit Profile</h1>
+    </div>
+</section>
+
+<div class="container" style="max-width: 600px; padding-bottom: var(--space-3xl);">
+    <div class="card card-static">
+        <form method="post" enctype="multipart/form-data" novalidate aria-label="Edit profile form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="profile-first-name">First Name</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                <div class="form-error" role="alert">{% for e in form.first_name.errors %}{{ e }}{% endfor %}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="profile-last-name">Last Name</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                <div class="form-error" role="alert">{% for e in form.last_name.errors %}{{ e }}{% endfor %}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="profile-email">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                <div class="form-error" role="alert">{% for e in form.email.errors %}{{ e }}{% endfor %}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="profile-bio">Bio</label>
+                {{ form.bio }}
+            </div>
+
+            <div class="form-group">
+                <label for="profile-location">Location</label>
+                {{ form.location }}
+            </div>
+
+            <div class="form-group">
+                <label for="profile-avatar">Profile Picture</label>
+                {{ form.avatar }}
+                <p class="form-help">Max 2MB. JPG, PNG, or GIF.</p>
+            </div>
+
+            <div class="flex gap-md" style="justify-content: flex-end;">
+                <a href="{% url 'accounts:profile' %}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

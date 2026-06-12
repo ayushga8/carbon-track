@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Contact — CarbonTrack{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<section class="page-header" style="margin-top: 60px;">
+    <div class="container">
+        <h1>📬 Get in Touch</h1>
+        <p>Have a question, suggestion, or just want to say hello? We'd love to hear from you.</p>
+    </div>
+</section>
+
+<div class="container" style="padding-bottom: var(--space-3xl);">
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-xl); max-width: 900px; margin: 0 auto;">
+
+        <!-- Contact Form -->
+        <div class="card card-static">
+            <h2 style="margin-bottom: var(--space-lg);">Send us a message</h2>
+            <form method="post" action="{% url 'contact' %}" novalidate aria-label="Contact form">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="form-error" role="alert" aria-live="assertive">
+                        {% for error in field.errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary btn-block">Send Message →</button>
+            </form>
+        </div>
+
+        <!-- Contact Info Sidebar -->
+        <div>
+            <div class="card card-static" style="margin-bottom: var(--space-lg);">
+                <h3 style="margin-bottom: var(--space-md);">📧 Email</h3>
+                <p><a href="mailto:hello@carbontrack.com">hello@carbontrack.com</a></p>
+            </div>
+            <div class="card card-static" style="margin-bottom: var(--space-lg);">
+                <h3 style="margin-bottom: var(--space-md);">📞 Phone</h3>
+                <p>+91 98765 43210</p>
+            </div>
+            <div class="card card-static">
+                <h3 style="margin-bottom: var(--space-md);">📍 Address</h3>
+                <p>CarbonTrack HQ<br>Bangalore, India<br>560001</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

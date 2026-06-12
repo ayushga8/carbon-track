@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Leaderboard — CarbonTrack{% endblock %}
+
+{% block content %}
+<section class="page-header" style="margin-top: 60px;">
+    <div class="container">
+        <h1>🏆 Leaderboard</h1>
+        <p>Top eco-warriors making the biggest difference.</p>
+    </div>
+</section>
+
+<div class="container" style="max-width: 900px; padding-bottom: var(--space-3xl);">
+
+    {% if top_users %}
+    <!-- Podium (Top 3) -->
+    {% if top_users|length >= 3 %}
+    <div class="leaderboard-podium">
+        <div class="podium-card silver">
+            <div class="podium-rank">🥈</div>
+            <h3>{{ top_users.1.user.username }}</h3>
+            <p style="color: var(--color-text-muted); font-size: var(--text-sm);">{{ top_users.1.completed_count }} challenges</p>
+            <p><strong>{{ top_users.1.total_saved|floatformat:1 }} kg CO₂ saved</strong></p>
+        </div>
+        <div class="podium-card gold">
+            <div class="podium-rank">🥇</div>
+            <h3>{{ top_users.0.user.username }}</h3>
+            <p style="color: var(--color-text-muted); font-size: var(--text-sm);">{{ top_users.0.completed_count }} challenges</p>
+            <p><strong>{{ top_users.0.total_saved|floatformat:1 }} kg CO₂ saved</strong></p>
+        </div>
+        <div class="podium-card bronze">
+            <div class="podium-rank">🥉</div>
+            <h3>{{ top_users.2.user.username }}</h3>
+            <p style="color: var(--color-text-muted); font-size: var(--text-sm);">{{ top_users.2.completed_count }} challenges</p>
+            <p><strong>{{ top_users.2.total_saved|floatformat:1 }} kg CO₂ saved</strong></p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Full Leaderboard Table -->
+    <div class="card card-static table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>User</th>
+                    <th>Challenges Completed</th>
+                    <th>CO₂ Saved</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in top_users %}
+                <tr {% if entry.user == request.user %}class="current-user"{% endif %}>
+                    <td>
+                        {% if forloop.counter == 1 %}🥇
+                        {% elif forloop.counter == 2 %}🥈
+                        {% elif forloop.counter == 3 %}🥉
+                        {% else %}#{{ forloop.counter }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ entry.user.username }}</strong>
+                        {% if entry.user == request.user %}<span class="badge badge-primary">You</span>{% endif %}
+                    </td>
+                    <td>{{ entry.completed_count }}</td>
+                    <td><strong style="color: var(--color-primary);">{{ entry.total_saved|floatformat:1 }} kg</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="card card-static" style="text-align: center; padding: var(--space-3xl);">
+        <p style="font-size: 3rem;">🏆</p>
+        <h3>No leaderboard data yet</h3>
+        <p>Complete challenges to appear on the leaderboard!</p>
+        <a href="{% url 'challenges:challenge_list' %}" class="btn btn-primary mt-3">Browse Challenges</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
