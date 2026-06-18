@@ -24,19 +24,33 @@ firebase_admin_initialized = False
 _firebase_auth = None
 
 try:
+    import json
     import firebase_admin
     from firebase_admin import credentials, auth as fb_auth
+
+    # Option 1: Credentials JSON from environment variable (for Vercel/cloud)
+    cred_json = os.getenv('FIREBASE_CREDENTIALS_JSON', '')
+    # Option 2: Credentials file path (for local development)
     cred_path = settings.FIREBASE_CREDENTIALS_PATH
-    if os.path.exists(cred_path):
+
+    if cred_json:
+        cred_dict = json.loads(cred_json)
+        cred = credentials.Certificate(cred_dict)
+        firebase_admin.initialize_app(cred)
+        _firebase_auth = fb_auth
+        firebase_admin_initialized = True
+        logger.info("Firebase Admin SDK initialized from environment variable.")
+    elif os.path.exists(cred_path):
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred)
         _firebase_auth = fb_auth
         firebase_admin_initialized = True
-        logger.info("Firebase Admin SDK initialized successfully.")
+        logger.info("Firebase Admin SDK initialized from credentials file.")
     else:
         logger.warning(
-            f"Firebase credentials not found at {cred_path}. "
-            "Social login will be disabled."
+            f"Firebase credentials not found. "
+            "Set FIREBASE_CREDENTIALS_JSON env var or provide file at "
+            f"{cred_path}. Social login will be disabled."
         )
 except ImportError:
     logger.warning(
