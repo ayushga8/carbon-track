@@ -19,7 +19,9 @@ from django.db.models import Sum, Count
 from django.http import JsonResponse
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from django.views.generic import FormView, DetailView, UpdateView
 
@@ -169,8 +171,13 @@ class ResendOTPView(View):
         return redirect('accounts:verify_otp')
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class FirebaseLoginView(View):
-    """Handle Firebase social authentication (Google, GitHub)."""
+    """Handle Firebase social authentication (Google, GitHub).
+
+    CSRF-exempt because the Firebase ID token itself serves as
+    the authentication proof (verified server-side via Admin SDK).
+    """
 
     def post(self, request, *args, **kwargs):
         """

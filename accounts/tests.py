@@ -836,3 +836,279 @@ class TestProfileView(TestCase):
         response = self.client.get(reverse('accounts:profile'))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(UserProfile.objects.filter(user=new_user).exists())
+
+
+# ============================================================
+# FIREBASE AUTH — verify_firebase_token() TESTS
+# ============================================================
+
+class TestVerifyFirebaseToken(TestCase):
+    """Test Firebase token verification with mocked Admin SDK."""
+
+    @patch('accounts.firebase_auth._firebase_auth')
+    @patch('accounts.firebase_auth.firebase_admin_initialized', True)
+    def test_valid_token_returns_decoded_data(self, mock_fb_auth):
+        """A valid Firebase ID token should return decoded user data."""
+        from accounts.firebase_auth import verify_firebase_token
+        expected = {'uid': 'abc123', 'email': 'test@gmail.com', 'email_verified': True}
+        mock_fb_auth.verify_id_token.return_value = expected
+
+        result = verify_firebase_token('valid-token-string')
+
+        self.assertEqual(result, expected)
+        mock_fb_auth.verify_id_token.assert_called_once_with('valid-token-string', check_revoked=True)
+
+    @patch('accounts.firebase_auth._firebase_auth')
+    @patch('accounts.firebase_auth.firebase_admin_initialized', True)
+    def test_invalid_token_returns_none(self, mock_fb_auth):
+        """An invalid or expired token should return None."""
+        from accounts.firebase_auth import verify_firebase_token
+        mock_fb_auth.verify_id_token.side_effect = Exception('Token expired')
+
+        result = verify_firebase_token('invalid-token')
+
+        self.assertIsNone(result)
+
+    @patch('accounts.firebase_auth._firebase_auth')
+    @patch('accounts.firebase_auth.firebase_admin_initialized', True)
+    def test_revoked_token_returns_none(self, mock_fb_auth):
+        """A revoked token should return None (check_revoked=True)."""
+        from accounts.firebase_auth import verify_firebase_token
+        mock_fb_auth.verify_id_token.side_effect = Exception('Token has been revoked')
+
+        result = verify_firebase_token('revoked-token')
+
+        self.assertIsNone(result)
+
+    @patch('accounts.firebase_auth.firebase_admin_initialized', False)
+    def test_sdk_not_initialized_returns_none(self):
+        """If Firebase Admin SDK is not initialized, return None gracefully."""
+        from accounts.firebase_auth import verify_firebase_token
+
+        result = verify_firebase_token('any-token')
+
+        self.assertIsNone(result)
+
+
+# ============================================================
+# FIREBASE AUTH — get_or_create_user_from_firebase() TESTS
+# ============================================================
+
+class TestGetOrCreateUserFromFirebase(TestCase):
+    """Test Firebase user creation/linking logic."""
+
+    def setUp(self):
+        self.firebase_data = {
+            'uid': 'firebase-uid-123',
+            'email': 'fireuser@gmail.com',
+            'name': 'Firebase User',
+            'email_verified': True,
+            'firebase': {'sign_in_provider': 'google.com'},
+        }
+
+    def test_creates_new_user_and_profile(self):
+        """Should create a new Django user and profile for a new Firebase UID."""
+        from accounts.firebase_auth import get_or_create_user_from_firebase
+
+        user = get_or_create_user_from_firebase(self.firebase_data)
+
+        self.assertEqual(user.email, 'fireuser@gmail.com')
+        self.assertEqual(user.first_name, 'Firebase')
+        self.assertEqual(user.last_name, 'User')
+        self.assertTrue(UserProfile.objects.filter(user=user, firebase_uid='firebase-uid-123').exists())
+
+    def test_profile_has_correct_provider(self):
+        """Profile should store 'google' as auth_provider for google.com sign-in."""
+        from accounts.firebase_auth import get_or_create_user_from_firebase
+
+        user = get_or_create_user_from_firebase(self.firebase_data)
+        profile = UserProfile.objects.get(user=user)
+
+        self.assertEqual(profile.auth_provider, 'google')
+
+    def test_returns_existing_user_by_uid(self):
+        """If a user with this Firebase UID already exists, return them without creating a new one."""
+        from accounts.firebase_auth import get_or_create_user_from_firebase
+        existing_user = User.objects.create_user('existing', 'existing@test.com', 'Pass1234!')
+        profile = UserProfile.objects.get(user=existing_user)
+        profile.firebase_uid = 'firebase-uid-123'
+        profile.save(update_fields=['firebase_uid'])
+
+        user = get_or_create_user_from_firebase(self.firebase_data)
+
+        self.assertEqual(user.pk, existing_user.pk)
+        self.assertEqual(User.objects.filter(email='existing@test.com').count(), 1)
+
+    def test_links_existing_user_by_verified_email(self):
+        """Should link Firebase UID to existing user when emails match and Firebase email is verified."""
+        from accounts.firebase_auth import get_or_create_user_from_firebase
+        existing_user = User.objects.create_user('emailuser', 'fireuser@gmail.com', 'Pass1234!')
+        # Profile already auto-created by post_save signal
+
+        user = get_or_create_user_from_firebase(self.firebase_data)
+
+        self.assertEqual(user.pk, existing_user.pk)
+        profile = UserProfile.objects.get(user=user)
+        self.assertEqual(profile.firebase_uid, 'firebase-uid-123')
+        self.assertTrue(profile.is_email_verified)
+
+    def test_does_not_link_unverified_email(self):
+        """Should NOT link to existing user if Firebase email is not verified."""
+        from accounts.firebase_auth import get_or_create_user_from_firebase
+        existing_user = User.objects.create_user('emailuser', 'fireuser@gmail.com', 'Pass1234!')
+        # Profile already auto-created by post_save signal
+
+        self.firebase_data['email_verified'] = False
+        user = get_or_create_user_from_firebase(self.firebase_data)
+
+        # Should create a new user, not link to the existing one
+        self.assertNotEqual(user.pk, existing_user.pk)
+
+    def test_handles_username_collision(self):
+        """Should generate a unique username when the email prefix is taken."""
+        from accounts.firebase_auth import get_or_create_user_from_firebase
+        User.objects.create_user('fireuser', 'other@test.com', 'Pass1234!')
+
+        user = get_or_create_user_from_firebase(self.firebase_data)
+
+        self.assertEqual(user.username, 'fireuser_1')
+
+    def test_handles_multiple_username_collisions(self):
+        """Should increment counter when multiple usernames are taken."""
+        from accounts.firebase_auth import get_or_create_user_from_firebase
+        User.objects.create_user('fireuser', 'other1@test.com', 'Pass1234!')
+        User.objects.create_user('fireuser_1', 'other2@test.com', 'Pass1234!')
+        User.objects.create_user('fireuser_2', 'other3@test.com', 'Pass1234!')
+
+        user = get_or_create_user_from_firebase(self.firebase_data)
+
+        self.assertEqual(user.username, 'fireuser_3')
+
+    def test_github_provider_mapping(self):
+        """github.com provider should map to 'github' in profile."""
+        from accounts.firebase_auth import get_or_create_user_from_firebase
+        self.firebase_data['firebase'] = {'sign_in_provider': 'github.com'}
+
+        user = get_or_create_user_from_firebase(self.firebase_data)
+        profile = UserProfile.objects.get(user=user)
+
+        self.assertEqual(profile.auth_provider, 'github')
+
+
+# ============================================================
+# FIREBASE LOGIN VIEW TESTS
+# ============================================================
+
+class TestFirebaseLoginView(TestCase):
+    """Test the FirebaseLoginView endpoint (/accounts/firebase-login/)."""
+
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('accounts:firebase_login')
+
+    @patch('accounts.views.get_or_create_user_from_firebase')
+    @patch('accounts.views.verify_firebase_token')
+    def test_valid_token_logs_in_user(self, mock_verify, mock_get_user):
+        """Valid Firebase token should authenticate and redirect to dashboard."""
+        user = User.objects.create_user('fireuser', 'fire@test.com', 'Pass1234!')
+        mock_verify.return_value = {'uid': 'abc', 'email': 'fire@test.com'}
+        mock_get_user.return_value = user
+
+        response = self.client.post(
+            self.url,
+            data='{"id_token": "valid-token"}',
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertIn('dashboard', data['redirect_url'])
+
+    @patch('accounts.views.verify_firebase_token')
+    def test_invalid_token_returns_401(self, mock_verify):
+        """Invalid/expired Firebase token should return 401."""
+        mock_verify.return_value = None
+
+        response = self.client.post(
+            self.url,
+            data='{"id_token": "bad-token"}',
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertFalse(response.json()['success'])
+
+    def test_missing_token_returns_400(self):
+        """Request without id_token should return 400."""
+        response = self.client.post(
+            self.url,
+            data='{"other": "data"}',
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()['success'])
+
+    def test_invalid_json_body_returns_400(self):
+        """Malformed JSON body should return 400."""
+        response = self.client.post(
+            self.url,
+            data='not-valid-json{{{',
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()['success'])
+
+    def test_empty_body_returns_400(self):
+        """Empty request body should return 400."""
+        response = self.client.post(
+            self.url,
+            data='',
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()['success'])
+
+    @patch('accounts.views.get_or_create_user_from_firebase')
+    @patch('accounts.views.verify_firebase_token')
+    def test_user_creation_failure_returns_500(self, mock_verify, mock_get_user):
+        """If user creation raises an exception, return 500."""
+        mock_verify.return_value = {'uid': 'abc', 'email': 'fire@test.com'}
+        mock_get_user.side_effect = Exception('Database error')
+
+        response = self.client.post(
+            self.url,
+            data='{"id_token": "valid-token"}',
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 500)
+        self.assertFalse(response.json()['success'])
+
+    @patch('accounts.views.get_or_create_user_from_firebase')
+    @patch('accounts.views.verify_firebase_token')
+    def test_successful_login_sets_session(self, mock_verify, mock_get_user):
+        """After successful Firebase login, user should be authenticated in session."""
+        user = User.objects.create_user('fireuser', 'fire@test.com', 'Pass1234!')
+        mock_verify.return_value = {'uid': 'abc', 'email': 'fire@test.com'}
+        mock_get_user.return_value = user
+
+        self.client.post(
+            self.url,
+            data='{"id_token": "valid-token"}',
+            content_type='application/json',
+        )
+
+        # Verify user is now authenticated by accessing a protected page
+        response = self.client.get(reverse('accounts:profile'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_request_not_allowed(self):
+        """GET requests to firebase-login should return 405 Method Not Allowed."""
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 405)
+

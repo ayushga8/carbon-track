@@ -130,11 +130,19 @@ def get_or_create_user_from_firebase(firebase_user_data):
         last_name=last_name,
     )
 
-    UserProfile.objects.create(
+    profile, _ = UserProfile.objects.get_or_create(
         user=user,
-        firebase_uid=uid,
-        auth_provider=auth_provider,
-        is_email_verified=email_verified,
+        defaults={
+            'firebase_uid': uid,
+            'auth_provider': auth_provider,
+            'is_email_verified': email_verified,
+        },
     )
+    if not _:
+        # Profile existed (created by signal), update Firebase fields
+        profile.firebase_uid = uid
+        profile.auth_provider = auth_provider
+        profile.is_email_verified = email_verified
+        profile.save(update_fields=['firebase_uid', 'auth_provider', 'is_email_verified'])
 
     return user

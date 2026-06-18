@@ -8,6 +8,7 @@ venv/
 env/
 ENV/
 .env
+firebase-credentials.json
 
 # Django
 *.log
@@ -24,3 +25,7 @@ staticfiles/
 .vscode/
 *.swp
 *.DS_Store
+
+# Vercel
+.vercel
+staticfiles_build/

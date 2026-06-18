@@ -42,7 +42,10 @@
 
                 {% if user.is_authenticated %}
                     <a href="{% url 'accounts:profile' %}" class="btn btn-outline btn-sm">Profile</a>
-                    <a href="{% url 'accounts:logout' %}" class="btn btn-primary btn-sm">Logout</a>
+                    <form action="{% url 'accounts:logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-sm">Logout</button>
+                    </form>
                 {% else %}
                     <a href="{% url 'accounts:login' %}" class="btn btn-outline btn-sm">Login</a>
                     <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Register</a>
