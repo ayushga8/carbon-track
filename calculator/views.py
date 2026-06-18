@@ -95,8 +95,8 @@ class EntryListView(LoginRequiredMixin, ListView):
             avg_co2=Avg('carbon_kg'),
         )
         context['total_entries'] = stats['total_entries'] or 0
-        context['total_co2'] = round(stats['total_co2'] or 0, 2)
-        context['avg_co2'] = round(stats['avg_co2'] or 0, 2)
+        context['total_carbon'] = round(stats['total_co2'] or 0, 2)
+        context['avg_daily'] = round(stats['avg_co2'] or 0, 2)
         context['categories'] = CarbonEntry.CATEGORY_CHOICES
         context['selected_category'] = self.request.GET.get('category', '')
         context['date_from'] = self.request.GET.get('date_from', '')
