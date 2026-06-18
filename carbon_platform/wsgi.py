@@ -1,26 +1,25 @@
 """
 WSGI config for Carbon Footprint Awareness Platform.
 
-Includes Vercel build hook: runs collectstatic on first import
-so WhiteNoise can serve static files in serverless environment.
+On Vercel: auto-runs migrate and collectstatic since /tmp is ephemeral.
 """
 
 import os
-from pathlib import Path
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'carbon_platform.settings')
 
 application = get_wsgi_application()
 
-# Vercel build hook: collect static files if staticfiles dir is missing
-_staticfiles_dir = Path(__file__).resolve().parent.parent / 'staticfiles'
-if not _staticfiles_dir.exists():
-    import subprocess
-    import sys
-    subprocess.run(
-        [sys.executable, 'manage.py', 'collectstatic', '--noinput'],
-        check=False,
-    )
+# Vercel: auto-run migrations (SQLite in /tmp is wiped on cold starts)
+if os.getenv('VERCEL'):
+    from django.core.management import call_command
+    import logging
+    logger = logging.getLogger(__name__)
+    try:
+        call_command('migrate', '--run-syncdb', verbosity=0)
+        logger.info('Vercel: migrations applied successfully.')
+    except Exception as e:
+        logger.warning(f'Vercel: migration failed: {e}')
 
 app = application

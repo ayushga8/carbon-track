@@ -95,12 +95,21 @@ WSGI_APPLICATION = 'carbon_platform.wsgi.application'
 # DATABASE
 # ============================================================
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.getenv('VERCEL'):
+    # Vercel has a read-only filesystem; use /tmp for SQLite
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': '/tmp/db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # ============================================================
 # PASSWORD VALIDATION (Strong Security)
