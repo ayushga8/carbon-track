@@ -28,14 +28,13 @@ SECRET_KEY = _secret
 
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-# Vercel CSRF trusted origins
-_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
-if _csrf_origins:
-    CSRF_TRUSTED_ORIGINS = _csrf_origins.split(',')
-else:
-    CSRF_TRUSTED_ORIGINS = ['https://*.vercel.app']
+# Auto-detect Vercel environment and allow all Vercel domains
+if os.getenv('VERCEL'):
+    ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://*.vercel.app').split(',')
 
 # ============================================================
 # APPLICATION DEFINITION
