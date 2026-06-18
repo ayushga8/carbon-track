@@ -95,8 +95,20 @@ WSGI_APPLICATION = 'carbon_platform.wsgi.application'
 # DATABASE
 # ============================================================
 
-if os.getenv('VERCEL'):
-    # Vercel has a read-only filesystem; use /tmp for SQLite
+_database_url = os.getenv('DATABASE_URL', '')
+
+if _database_url:
+    # Cloud PostgreSQL (Neon, Supabase, Vercel Postgres, etc.)
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=_database_url,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+elif os.getenv('VERCEL'):
+    # Vercel fallback: /tmp SQLite (ephemeral, data lost on cold start)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -104,12 +116,20 @@ if os.getenv('VERCEL'):
         }
     }
 else:
+    # Local development: file-based SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+# ============================================================
+# SESSION (cookie-based on Vercel so login persists across cold starts)
+# ============================================================
+
+if os.getenv('VERCEL') and not _database_url:
+    SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 # ============================================================
 # PASSWORD VALIDATION (Strong Security)
